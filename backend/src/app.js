@@ -3,16 +3,17 @@ import cors from "cors";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 import { connectDB } from "../src/config/db.js";
+import { connectSocket } from "./controllers/socketManager.controller.js";
 
 const PORT = process.env.PORT;
 const app = express();
 const server = createServer(app);
-const io = new Server(server);
+const io = connectSocket(server);
 
 app.set("port", process.env.PORT || 8000);
-app.get("/home", (req, res) => {
-  return res.json({ message: "You are at home!!" });
-});
+app.use(cors());
+app.use(express.json({ limit: "40kb" }));
+app.use(express.urlencoded({ limit: "40kb", extended: true }));
 
 const start = async () => {
   server.listen(app.get("port"), () => {
