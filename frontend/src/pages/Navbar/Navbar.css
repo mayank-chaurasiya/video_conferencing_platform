@@ -1,0 +1,23 @@
+.navbar__container {
+  padding-inline: 1.9rem;
+  padding-block: 1.3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav__logo {
+  font-family: "Almendra SC", serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 2rem;
+  letter-spacing: 0.24rem;
+}
+
+.navlist {
+  font-family: "Nova Mono", monospace;
+  display: flex;
+  gap: 1.8rem;
+  cursor: pointer;
+  font-size: 1.13rem;
+}

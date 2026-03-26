@@ -1,0 +1,55 @@
+.landingPage {
+  width: 100vw;
+  height: 100vh;
+  background: url("/landingpage_background.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: white;
+}
+
+.landingPageContainer {
+  display: flex;
+  justify-content: space-between;
+  padding-inline: 4rem;
+  height: 80vh;
+  align-items: center;
+}
+
+.landingPageContainer__left > p:nth-child(1) {
+  font-family: "Neuton", serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 4rem;
+  letter-spacing: 0.037em;
+}
+
+.landingPageContainer__left > p:nth-child(2) {
+  font-family: "Nova Mono", monospace;
+  font-size: 1.7rem;
+  padding-block: 0.6rem;
+}
+
+.connect_text {
+  color: #ff9839;
+}
+
+.getStarted__btn {
+  background: #d97500;
+  width: fit-content;
+  padding-block: 1rem;
+  padding-inline: 1.5rem;
+  border-radius: 60px;
+  font-size: 1.3rem;
+  margin-top: 1rem;
+  font-family: "Sour Gummy", sans-serif;
+}
+
+.getStarted__btn a {
+  color: white;
+  text-decoration: none;
+}
+
+.landingPageContainer__right > img {
+  height: 70vh;
+  width: auto;
+}
