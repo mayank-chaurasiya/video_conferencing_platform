@@ -1,11 +1,9 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Avatar,
   Box,
   Button,
-  Checkbox,
   Container,
-  FormControlLabel,
   Grid,
   Link,
   Paper,
@@ -15,15 +13,39 @@ import {
 import LockOpenOutlined from "@mui/icons-material/LockOpenOutlined";
 import { Link as RouterLink } from "react-router-dom";
 import "./Authentication.css";
+import { AuthContext } from "../../contexts/AuthContext.jsx";
 
 export const Authentication = () => {
-  const [username, setUsername] = useState();
-  const [name, setName] = useState();
-  const [formState, setFormState] = useState();
-  const [password, setPassword] = useState();
-  const [error, setError] = useState();
-  const [messages, setMessages] = useState();
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [formState, setFormState] = useState(0);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [open, setOpen] = useState(false);
+  const { handleRegister, handleLogin } = useContext(AuthContext);
+
+  let handleAuth = async () => {
+    try {
+      if (formState === 0) {
+        let result = await handleLogin(username, password);
+      }
+      if (formState === 1) {
+        let result = await handleRegister(name, username, password);
+        console.log(result);
+        setUsername("");
+        setMessage(result);
+        setOpen(true);
+        setError("");
+        setFormState(0);
+        setPassword("");
+      }
+    } catch (error) {
+      let message = error.response.data.message;
+      setError(message);
+    }
+  };
+
   return (
     <Container maxWidth="xs">
       <Paper elevation={10} sx={{ marginTop: 8, padding: 2 }}>
@@ -107,19 +129,19 @@ export const Authentication = () => {
           />
 
           <p style={{ color: "red" }}>{error}</p>
-          <Button type="submit" variant="contained" fullWidth sx={{ mt: 1 }}>
-            SIGN IN
+
+          <Button
+            type="button"
+            variant="contained"
+            fullWidth
+            sx={{ mt: 2, mb: 2 }}
+            onClick={handleAuth}
+          >
+            {formState === 0 ? "Sign In" : "Register"}
           </Button>
         </Box>
-        <Grid container justifyContent="space-evenly" sx={{ mt: 3 }}>
-          <Grid item>
-            <Link component={RouterLink} to="/register">
-              New User?
-            </Link>
-          </Grid>
-        </Grid>
       </Paper>
-      <Snackbar open={open} autoHideDuration={4000} message={messages} />
+      <Snackbar open={open} autoHideDuration={4000} message={message} />
     </Container>
   );
 };
