@@ -14,7 +14,7 @@ const Landing_page = () => {
           </p>
           <p>Cover a distance by Video Call</p>
           <div role="button" className="getStarted__btn">
-            <Link to={"/home"}>Get Started</Link>
+            <Link to={"/auth"}>Get Started</Link>
           </div>
         </div>
         <div className="landingPageContainer__right">
