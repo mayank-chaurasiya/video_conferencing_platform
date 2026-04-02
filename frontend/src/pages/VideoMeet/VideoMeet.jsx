@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import "./VideoMeet.css";
-import { useParams } from "react-router-dom";
 import { TextField, Button } from "@mui/material";
+import { io } from "socket.io-client";
+import "./VideoMeet.css";
 
 const server_url = "http://localhost:8000";
 
@@ -20,7 +20,7 @@ export const VideoMeet = () => {
   let localVideoRef = useRef();
   let [videoAvailable, setVideoAvailable] = useState(true);
   let [audioAvailable, setAudioAvailable] = useState(true);
-  let [video, setVideo] = useState();
+  let [video, setVideo] = useState([]);
   let [audio, setAudio] = useState();
   let [screen, setScreen] = useState();
   let [showModel, setShowModel] = useState();
@@ -110,11 +110,71 @@ export const VideoMeet = () => {
     }
   }, [audio, video]);
 
+  let gotMessageFromServer = (fromId, message) => {};
+
+  let addMessage = (data, sender, socketIdSender) => {
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { sender, data, socketId: socketIdSender },
+    ]);
+    setNewMessages((currentCount) => currentCount + 1);
+  };
+
+  let connectToSocketServer = () => {
+    if (socketRef.current?.connected) {
+      return;
+    }
+
+    socketRef.current = io(server_url, { secure: false });
+    socketRef.current.on("signal", gotMessageFromServer);
+    socketRef.current.on("chat-message", addMessage);
+    socketRef.current.on("user-left", (id) => {
+      setVideos((currentVideos) =>
+        currentVideos.filter((videoItem) => videoItem.socketId !== id),
+      );
+    });
+    socketRef.current.on("user-joined", (id, clients) => {
+      clients.forEach((socketListId) => {
+        connections[socketListId] = new RTCPeerConnection(
+          peerConfigConnections,
+        );
+        connections[socketListId].onicecandidate = (event) => {
+          if (event.candidate !== null) {
+            socketRef.current.emit(
+              "signal",
+              socketListId,
+              JSON.stringify({ ice: event.candidate }),
+            );
+          }
+        };
+        connections[socketListId].onaddstream = (event) => {};
+      });
+    });
+    socketRef.current.on("connect_error", (error) => {
+      console.log(error.message);
+    });
+    socketRef.current.on("connect", () => {
+      socketRef.current.emit("join-call", window.location.href);
+      socketIdRef.current = socketRef.current.id;
+    });
+  };
+
   let getMedia = () => {
     setVideo(videoAvailable);
     setAudio(audioAvailable);
-    // connectToSocketServer();
+    connectToSocketServer();
   };
+
+  let handleConnect = () => {
+    setForUsername(false);
+    getMedia();
+  };
+
+  useEffect(() => {
+    return () => {
+      socketRef.current?.disconnect();
+    };
+  }, []);
 
   return (
     <div>
@@ -128,7 +188,9 @@ export const VideoMeet = () => {
             onChange={(e) => setUsername(e.target.value)}
             variant="outlined"
           />
-          <Button variant="contained">Connect</Button>
+          <Button variant="contained" onClick={handleConnect}>
+            Connect
+          </Button>
 
           <div>
             <video ref={localVideoRef} autoPlay muted></video>
