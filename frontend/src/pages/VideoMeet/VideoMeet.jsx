@@ -28,7 +28,7 @@ export const VideoMeet = () => {
   let [messages, setMessages] = useState([]);
   let [message, setMessage] = useState("");
   let [newMessages, setNewMessages] = useState(0);
-  let [askForUsername, setForUsername] = useState(true);
+  let [askForUsername, setAskForUsername] = useState(true);
   let [username, setUsername] = useState("");
   let [videos, setVideos] = useState([]);
 
@@ -125,6 +125,11 @@ export const VideoMeet = () => {
           console.log(error);
         }
 
+        let blackSilence = (...args) =>
+          new MediaStream([black(...args), silence()]);
+        window.localStream = blackSilence();
+        localVideoRef.current.srcObject = window.localStream;
+
         for (let id in connections) {
           connections[id].addStream(window.localStream);
           connections[id].createOffer().then((description) => {
@@ -142,6 +147,25 @@ export const VideoMeet = () => {
         }
       };
     });
+  };
+
+  let silence = () => {
+    let ctx = new AudioContext();
+    let oscillator = ctx.createOscillator();
+    let dst = oscillator.connect(ctx.createMediaStreamDestination());
+    oscillator.start();
+    ctx.resume();
+    return Object.assign(dst.stream.getAudioTracks()[0], { enabled: false });
+  };
+
+  let black = ({ width = 640, height = 480 } = {}) => {
+    let canvas = Object.assign(document.createElement("canvas"), {
+      width,
+      height,
+    });
+    canvas.getContext("2d").fillRect(0, 0, width, height);
+    let stream = canvas.captureStream();
+    return Object.assign(stream.getVideoTracks()[0], { enabled: false });
   };
 
   let getUserMedia = () => {
@@ -271,7 +295,10 @@ export const VideoMeet = () => {
         if (window.localStream !== undefined && window.localStream !== null) {
           connections[socketListId].addStream(window.localStream);
         } else {
-          // let blackSilence
+          let blackSilence = (...args) =>
+            new MediaStream([black(...args), silence()]);
+          window.localStream = blackSilence();
+          connections[socketListId].addStream(window.localStorage);
         }
       });
       if (id === socketIdRef.current) {
@@ -315,7 +342,7 @@ export const VideoMeet = () => {
   };
 
   let handleConnect = () => {
-    setForUsername(false);
+    setAskForUsername(false);
     getMedia();
   };
 
@@ -346,7 +373,13 @@ export const VideoMeet = () => {
           </div>
         </div>
       ) : (
-        <></>
+        <>
+          <video ref={localVideoRef} autoPlay muted></video>
+
+          {videos.map((video) => (
+            <div key={video.socketId}></div>
+          ))}
+        </>
       )}
     </div>
   );
