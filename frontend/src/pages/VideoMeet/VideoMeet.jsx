@@ -196,7 +196,9 @@ export const VideoMeet = () => {
                 socketRef.current.emit(
                   "signal",
                   id2,
-                  JSON.stringify({ sdp: connections[id2].localDescription }),
+                  JSON.stringify({
+                    sdp: connections[id2].localDescription,
+                  }) /* sdp -  session Description */,
                 );
               })
               .catch((error) => console.log(error));
